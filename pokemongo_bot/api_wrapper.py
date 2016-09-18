@@ -38,7 +38,7 @@ class ApiWrapper(PGoApi, object):
             "firmware_type": '9.3.3'
         }
 
-        PGoApi.__init__(self, device_info=device_info)
+        PGoApi.__init__(self)
 
         # Set to default, just for CI...
         self.actual_lat, self.actual_lng, self.actual_alt = PGoApi.get_position(self)
