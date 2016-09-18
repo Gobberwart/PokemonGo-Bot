@@ -166,30 +166,27 @@ class TransferPokemon(BaseTask):
             cp_iv_logic = self._get_release_config_for(
                 'any').get('logic', 'and')
 
-        release_results = {
-            'cp': False,
-            'iv': False,
-            'ivcp': False
-        }
-
         if release_config.get('never_release', False):
             return False
 
         if release_config.get('always_release', False):
             return True
 
-        release_cp = release_config.get('release_below_cp', 0)
-        if pokemon.cp < release_cp:
-            release_results['cp'] = True
+        release_cp = release_config.get('release_below_cp', False)
+        release_iv = release_config.get('release_below_iv', False)
+        release_ivcp = release_config.get('release_below_ivcp', False)
 
-        release_iv = release_config.get('release_below_iv', 0)
-        if pokemon.iv < release_iv:
-            release_results['iv'] = True
-
-        release_ivcp = release_config.get('release_below_ivcp', 0)
-        if pokemon.ivcp < release_ivcp:
-            release_results['ivcp'] = True
-
+            
+        release_results = {}
+        if (cp_iv_logic == 'and'):
+            release_results['cp'] = (release_config.get('release_below_cp', -1) != 0) and (not release_cp or pokemon.cp < release_cp)
+            release_results['iv'] = (release_config.get('release_below_iv', -1) != 0) and (not release_iv or pokemon.iv < release_iv)
+            release_results['ivcp'] = (release_config.get('release_below_ivcp', -1) != 0) and (not release_ivcp or pokemon.ivcp < release_ivcp)
+        else:
+            release_results['cp'] = release_cp and pokemon.cp < release_cp
+            release_results['iv'] = release_iv and pokemon.iv < release_iv
+            release_results['ivcp'] = release_ivcp and pokemon.ivcp < release_ivcp
+            
         logic_to_function = {
             'or': lambda x, y, z: x or y or z,
             'and': lambda x, y, z: x and y and z
@@ -242,13 +239,10 @@ class TransferPokemon(BaseTask):
                 'iv': pokemon.iv,
                 'cp': pokemon.cp,
                 'ivcp': pokemon.ivcp,
-                'candy': candy.quantity,
-                'candy_type': candy.type
+                'candy': candy.quantity
             },
-            formatted="Released {} (CP: {}, IV: {}, IVCP: {:.2f}) You now have"
-                      " {} {} candies".format(pokemon.name, pokemon.cp,
-                                              pokemon.iv, pokemon.ivcp,
-                                              candy.quantity, candy.type)
+
+            formatted="Released {} (CP: {}, IV: {}, IVCP: {:.2f}) You now have {} {} candies".format(pokemon.name, pokemon.cp, pokemon.iv, pokemon.ivcp, candy.quantity, pokemon.name),
         )
         with self.bot.database as conn:
             c = conn.cursor()
