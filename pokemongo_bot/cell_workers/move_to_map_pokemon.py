@@ -207,7 +207,6 @@ class MoveToMapPokemon(BaseTask):
         self.cache.append(pokemon)
 
     def snipe(self, pokemon):
-        print "Pokemon: {}".format(pokemon)
         # Backup position before anything
         last_position = self.bot.position[0:2]
 
@@ -239,7 +238,6 @@ class MoveToMapPokemon(BaseTask):
 
             # Make sure the target still/really exists (TODO: validate expiration)
             for nearby_pokemon in nearby_pokemons:
-                print "Nearby pokemon: {}".format(nearby_pokemon)
                 is_wild = 'pokemon_data' in nearby_pokemon
                 nearby_pokemon_id = nearby_pokemon['pokemon_data']['pokemon_id'] if is_wild else nearby_pokemon['pokemon_id']
 
@@ -247,19 +245,7 @@ class MoveToMapPokemon(BaseTask):
                     exists = True
 
                     # Also, if the IDs arent valid, update them!
-                    try:
-                        print pokemon['encounter_id']
-                        print pokemon['spawnpoint_id']
-                        print pokemon['disappear_time']
-                        print nearby_pokemon['encounter_id']
-                        print nearby_pokemon['spawn_point_id']
-                        print nearby_pokemon['last_modified_timestamp_ms']
-                        print nearby_pokemon['expiration_timestamp_ms']
-                    except:
-                        print "ERRORERRORERROR!"
-                        pass
-                        
-                    if not pokemon['encounter_id'] or not pokemon['spawnpoint_id']:
+                    if not pokemon['encounter_id'] or not pokemon['spawn_point_id']:
                         pokemon['encounter_id'] = nearby_pokemon['encounter_id']
                         pokemon['spawn_point_id'] = nearby_pokemon['spawn_point_id']
                         pokemon['disappear_time'] = nearby_pokemon['last_modified_timestamp_ms'] if is_wild else nearby_pokemon['expiration_timestamp_ms']
@@ -337,7 +323,6 @@ class MoveToMapPokemon(BaseTask):
             if self.snipe_high_prio_only:
                 count = 0
                 for pokemon in pokemon_list:
-                    print pokemon
                     if self.snipe_high_prio_threshold < pokemon['priority']:
                         self.snipe(pokemon)
                         count += 1
